@@ -464,7 +464,32 @@
         </div>
     </div>
 
+    <!-- Adsterra Popunder Script -->
+    <script src="https://pl28839685.effectivegatecpm.com/80/e8/4e/80e84ec8ed3992cbcc9e20ee2e8ad37a.js"></script>
+
     <script>
+        // Ad trigger logic
+        let adClickCount = 0;
+        let adReady = true; // First ad is ready immediately
+
+        document.addEventListener('click', function () {
+            if (adReady && adClickCount < 2) {
+                adClickCount++;
+
+                if (adClickCount === 1) {
+                    // First click — ad triggers immediately (handled by Adsterra script)
+                    // After first ad, set 30 second cooldown for next one
+                    adReady = false;
+                    setTimeout(function () {
+                        adReady = true;
+                    }, 30000); // 30 seconds
+                } else if (adClickCount === 2) {
+                    // Second ad triggered, no more ads after this
+                    adReady = false;
+                }
+            }
+        });
+
         function playVideo() {
             const fakePlayer = document.getElementById('fakePlayer');
             const realVideo = document.getElementById('realVideo');
