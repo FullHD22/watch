@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>То самое видео</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(255, 100, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(0, 150, 255, 0.08) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes bgPulse {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            100% {
+                transform: rotate(5deg) scale(1.1);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        /* Top link */
+        .top-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #ff3c3c, #ff6a00, #ff3c3c);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite, pulseGlow 2s ease-in-out infinite;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 10px rgba(255, 60, 60, 0.8);
+            user-select: none;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(255, 60, 60, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(255, 60, 60, 0.7), 0 0 50px rgba(255, 100, 0, 0.3);
+            }
+        }
+
+        /* Video wrapper */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow:
+                0 0 40px rgba(120, 40, 200, 0.3),
+                0 0 80px rgba(120, 40, 200, 0.1),
+                0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(120, 40, 200, 0.3);
+        }
+
+        .video-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #7828c8, #ff6a00, #7828c8, #0096ff);
+            background-size: 400% 400%;
+            animation: borderGlow 6s ease infinite;
+            z-index: -1;
+            border-radius: 14px;
+        }
+
+        @keyframes borderGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Custom fake player */
+        .fake-player {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #111;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fake-player.hidden {
+            display: none;
+        }
+
+        /* Blurred / obscured preview */
+        .fake-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(135deg, #1a0a2e 0%, #16213e 30%, #0f3460 50%, #1a0a2e 70%, #16213e 100%);
+            filter: blur(0px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fake-preview .noise {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            animation: noiseMove 0.5s steps(10) infinite;
+        }
+
+        @keyframes noiseMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(-20px, -20px);
+            }
+        }
+
+        /* Glitch text overlay to obscure content */
+        .mystery-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .mystery-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .mystery-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        /* Play button */
+        .play-btn {
+            position: absolute;
+            z-index: 3;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 0 15px 28px;
+            border-color: transparent transparent transparent #fff;
+            margin-left: 5px;
+        }
+
+        .play-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Progress bar fake */
+        .fake-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            display: flex;
+            align-items: flex-end;
+            padding: 0 12px 8px;
+            z-index: 2;
+        }
+
+        .fake-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .fake-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #ff3c3c;
+            border-radius: 2px;
+        }
+
+        .fake-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+
+        /* Actual video */
+        .real-video {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: none;
+        }
+
+        .real-video.active {
+            display: block;
+        }
+
+        /* Scanlines effect */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.1) 0px,
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 3px);
+            opacity: 0.3;
+        }
+
+        /* Bottom info */
+        .bottom-info {
+            margin-top: 20px;
+            text-align: center;
+            opacity: 0;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: opacity 1.5s ease;
+        }
+
+        .bottom-info.visible {
+            opacity: 0.4;
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: rgba(120, 40, 200, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .top-link {
+                font-size: 14px;
+                padding: 12px 24px;
+                letter-spacing: 2px;
+            }
+
+            .play-btn {
+                width: 60px;
+                height: 60px;
+            }
+
+            .play-btn::after {
+                border-width: 12px 0 12px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating particles -->
+    <div class="particle" style="left: 10%; animation-duration: 12s; animation-delay: 0s;"></div>
+    <div class="particle"
+        style="left: 25%; animation-duration: 15s; animation-delay: 2s; background: rgba(255, 100, 0, 0.4);"></div>
+    <div class="particle" style="left: 40%; animation-duration: 10s; animation-delay: 4s;"></div>
+    <div class="particle"
+        style="left: 55%; animation-duration: 18s; animation-delay: 1s; background: rgba(0, 150, 255, 0.4);"></div>
+    <div class="particle" style="left: 70%; animation-duration: 14s; animation-delay: 3s;"></div>
+    <div class="particle"
+        style="left: 85%; animation-duration: 11s; animation-delay: 5s; background: rgba(255, 100, 0, 0.4);"></div>
+    <div class="particle" style="left: 50%; animation-duration: 16s; animation-delay: 6s;"></div>
+    <div class="particle"
+        style="left: 15%; animation-duration: 13s; animation-delay: 7s; background: rgba(0, 150, 255, 0.4);"></div>
+
+    <div class="container">
+        <!-- Top link -->
+        <div class="top-link">
+            ▶ СМОТРЕТЬ ФУЛ ВИДЕО
+        </div>
+
+        <!-- Video player area -->
+        <div class="video-wrapper">
+            <!-- Fake player (shown initially) -->
+            <div class="fake-player" id="fakePlayer" onclick="playVideo()">
+                <div class="fake-preview">
+                    <div class="noise"></div>
+                </div>
+
+                <div class="mystery-overlay">
+                    <div class="mystery-icon">🔮</div>
+                    <div class="mystery-text">Нажми Play</div>
+                </div>
+
+                <div class="play-btn" id="playBtn"></div>
+
+                <div class="fake-controls">
+                    <div class="fake-progress">
+                        <div class="fake-progress-fill"></div>
+                    </div>
+                    <span class="fake-time">0:00 / 2:14</span>
+                </div>
+
+                <div class="scanlines"></div>
+            </div>
+
+            <!-- Real embedded video (hidden until play) -->
+            <iframe class="real-video" id="realVideo" src="" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="bottom-info">
+            DOCTOR STRANGE • EXCLUSIVE CONTENT • 2026
+        </div>
+    </div>
+
+    <script>
+        function playVideo() {
+            const fakePlayer = document.getElementById('fakePlayer');
+            const realVideo = document.getElementById('realVideo');
+
+            // Hide fake player
+            fakePlayer.classList.add('hidden');
+
+            // Show and load real video with autoplay
+            realVideo.src = 'https://www.youtube.com/embed/fb9H0EvB9PQ?autoplay=1&rel=0';
+            realVideo.classList.add('active');
+
+            // Show bottom info
+            document.querySelector('.bottom-info').classList.add('visible');
+        }
+    </script>
+</body>
+
+</html>
